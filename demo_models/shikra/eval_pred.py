@@ -2,14 +2,13 @@ import torch
 from overlaps import bbox_overlaps
 from statistics import mean
 from datasets import load_dataset
-
-
-# define args functions
+from hc_refloco import HCRefLoCoEvaluator
+# define args func  tions
 # to receive the arguments from the command
 def define_args():
     import argparse
-    parser = argparse.ArgumentParser(description='Eval the prediction')
-    parser.add_argument('--output_path', type=str, default='', help='path to the prediction file')
+    parser = argparse.ArgumentParser(description='Eval the prediction.')
+    parser.add_argument('--pred_dir', type=str, default='', help='path to the prediction dir.')
     parser.add_argument('--split', type=str, default='val', help='split of the dataset')
     parser.add_argument('--dataset_path', type=str, default='HC-RefLoCo', help='path to the dataset')
     return parser.parse_args()
@@ -65,41 +64,27 @@ def calculate_iou_acc(pred_bboxes,gt_bboxes, thresh=0.5):
 
 if __name__=='__main__':
     args=define_args()
-    output_path=args.output_path
+    pred_dir=args.pred_dir
     split=args.split
     dataset_path=args.dataset_path
 
-    pred_root=f"{output_path}/custom_metrics.pth"
-    preds = torch.load(pred_root)
-    all_annts=load_dataset(dataset_path)[split]
-
-    pred_bboxes=[]
-    gt_bboxes=[]
-    for idx,annt in enumerate(all_annts):
-        pred_bbox=preds['pred_boxes'][idx]
-        # print(pred_bbox)
-        img_path=annt['file_name']
+    pred_path=f"{pred_dir}/metrics.pt"
+    preds = torch.load(pred_path)
+    dataset=load_dataset(dataset_path)
+    evaluator=HCRefLoCoEvaluator(dataset,split)
+    annotations=dataset[split]
+    pred_dict=[]
+    for idx,annt in enumerate(annotations):
+        pred_bbox=preds['test_pred_boxes'][idx]
         height,width=annt['height'],annt['width']
 
-        gt_bbox=annt['bbox']
-        gt_bbox=[gt_bbox[0],gt_bbox[1],gt_bbox[0]+gt_bbox[2],gt_bbox[1]+gt_bbox[3]]
         if(pred_bbox!=[0,0,0,0]):
             pred_bbox=list(box_xyxy_de_expand2square(pred_bbox*max(width,height), w=width, h=height))
-        gt_bboxes.append(gt_bbox)
-        pred_bboxes.append(pred_bbox)
+        pred_dict.append({
+            'id':annt['id'],
+            'pred_bbox':pred_bbox,
+            'format':'xyxy'
+        })
+    evaluator.evaluate(pred_dict)
 
-    pred_bboxes=torch.tensor(pred_bboxes)
-    gt_bboxes=torch.tensor(gt_bboxes)
-    # create a list fron 0.5 to 0.9 with step 0.05
-    thresh=[i/100 for i in range(50,100,5)]
-    print(thresh)
-    iou,acc=calculate_iou_acc(pred_bboxes,gt_bboxes,thresh)
-    print_ths=[0.5,0.75,0.9]
-
-    acc_list=[]
-    for k,v in acc.items():
-        if(k in print_ths):
-            print(f"iou|{k}={v}")
-            acc_list.append(v)
-    print(f"iou|0.5:0.9={mean([v for v in acc.values()])}")
-    acc_list.append(mean([v for v in acc.values()]))
+    

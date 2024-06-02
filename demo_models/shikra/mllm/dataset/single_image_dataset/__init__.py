@@ -1,5 +1,5 @@
 from .flickr import FlickrParser, FlickrDataset
-from .rec import RECDataset, RECComputeMetrics, HCRefLoCoDatasetDataset, HCRefLoCoComputeMetrics
+from .rec import RECDataset, RECComputeMetrics, HCRefLoCoDataset, HCRefLoCoComputeMetrics
 from .reg import REGDataset, GCDataset
 from .caption import CaptionDataset
 from .instr import InstructDataset

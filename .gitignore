@@ -1,3 +1,5 @@
-# exclude all .vscode dir in .gitignore
 .vscode/
 __pycache__/
+hc_refloco.egg-info/
+build/
+demo_models/ckpt/

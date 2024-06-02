@@ -108,7 +108,7 @@ def main():
     # Predict
     if training_args.do_predict:
         predict_results = trainer.predict(dataset['test'], metric_key_prefix="test", **gen_kwargs)
-        path = os.path.join(trainer.args.output_dir, f"matrix.pt")
+        path = os.path.join(trainer.args.output_dir, f"metrics.pt")
         torch.save(predict_results.metrics,path)
         predict_results.metrics.pop('test_pred_boxes', None)
         trainer.log_metrics("test", predict_results.metrics)  # noqa

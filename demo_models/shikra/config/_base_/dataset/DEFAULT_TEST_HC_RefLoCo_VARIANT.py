@@ -1,9 +1,8 @@
 REC_TEST_COMMON_CFG = dict(
     type='HCRefLoCoDataset',
     template_file=r'{{fileDirname}}/template/REC.json',
-    dataset_path=r'./HC-RefLoCo',
+    dataset_path=r'../../HC-RefLoCo',
     split='val',
-    transforms=None,
     max_dynamic_size=None,
 )
 

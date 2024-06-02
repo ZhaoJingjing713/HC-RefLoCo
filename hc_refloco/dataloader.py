@@ -3,7 +3,6 @@ import io
 from PIL import Image
 from datasets import load_dataset
 from torch.utils.data import Dataset
-import torchvision.transforms as transforms
 
 class HCRefLoCoDataset(Dataset):
     def __init__(self, dataset_path, split, custom_transforms=None):
@@ -12,15 +11,15 @@ class HCRefLoCoDataset(Dataset):
 
         Parameters:
         - dataset_path (str): Path to the dataset directory.
-        - split (str): Dataset split, typically "train", "val", or "test".
-        - custom_transforms: Custom image transformations to apply, default is to convert to tensor.
+        - split (str): Dataset split, typically "val" or "test".
+        - custom_transforms: Custom image transformations to apply.
         """
         super(HCRefLoCoDataset, self).__init__()
         assert split in ['val', 'test'], 'split should be val or test'
         self.split = split
         self.dataset_path = dataset_path
         self.images_file = "images.tar.gz"
-        self.transforms = custom_transforms if custom_transforms is not None else transforms.ToTensor()
+        self.transforms = custom_transforms
         self._load_dataset()
 
     def _load_images_from_tar(self):
@@ -57,14 +56,5 @@ class HCRefLoCoDataset(Dataset):
         data = self.datas[self.split][idx]
         image_name = data['file_name']
         image = self.images[image_name]
-        image = self.transforms(image)
+        image = self.transforms(image) if self.transforms else image
         return image, data
-
-if __name__=='__main__':
-    # Example usage:
-    dataset = HCRefLoCoDataset("HC-RefLoCo", "val")  # Can also be "test"
-    image, data = dataset[0]
-    print(image.shape, data)
-    dataset.change_split("test")
-    image, data = dataset[0]
-    print(image.shape, data)
