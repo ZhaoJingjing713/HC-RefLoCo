@@ -128,7 +128,3 @@ Please note that the images in the HC-RefLoCo dataset are derived from the follo
 - **Laion 5B**: Licensed under the [Creative Commons Attribution 4.0 International (CC BY 4.0) license](https://creativecommons.org/licenses/by/4.0/).
 
 By using the HC-RefLoCo dataset, you agree to comply with the licensing terms of these source datasets.
-
-## Contact
-For questions or comments about the HC-RefLoCo dataset, please contact:
-- Jinjing Zhao (The University of Sydney) - jzha0100@uni.sydney.edu.au
