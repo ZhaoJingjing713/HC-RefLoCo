@@ -57,7 +57,7 @@ The evaluation considers three parts:
 
 Here is an example output for the predictions from Shikra on the validation set:
 
-```bash
+```txt
 Item                             | Value
 --------------------------------------------------------------------
 iou|0.5                          | 0.5709580838323354
