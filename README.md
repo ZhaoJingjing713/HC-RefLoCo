@@ -59,26 +59,28 @@ Here is an example output for the predictions from Shikra on the validation set:
 
 ```txt
 Item                             | Value
---------------------------------------------------------------------
+--------------------------------------------------------------------------
 iou|0.5                          | 0.5709580838323354
 iou|0.75                         | 0.35419161676646704
 iou|0.9                          | 0.10546407185628742
-iou|0.5:0.9                      | 0.34418413173652695
-Accs for copy                    | 0.57, 0.35, 0.11, 0.34
---------------------------------------------------------------------
+iou|0.5:0.95                     | 0.34418413173652695
+Accs for copy                    | 0.571, 0.354, 0.105, 0.344
+--------------------------------------------------------------------------
 Subject-Appearance               | 0.32812803961446635
 Subject-Human-Object Interaction | 0.3241014044275172
 Subject-Celebrity                | 0.5630392156862745
 Subject-OCR                      | 0.31104693140794226
 Subject-Action                   | 0.3015205271160669
 Subject-Location                 | 0.31951608941292065
-Subject evaluation for copy      | 0.33, 0.32, 0.56, 0.31, 0.3, 0.32
---------------------------------------------------------------------
+Subject evaluation for copy      | 0.328, 0.324, 0.563, 0.311, 0.302, 0.32
+--------------------------------------------------------------------------
 Small                            | 0.14040650406504065
 Medium                           | 0.3437775330396476
 Large                            | 0.3820263394193355
-Size evaluation for copy         | 0.14, 0.34, 0.38
+Size evaluation for copy         | 0.14, 0.344, 0.382
 ```
+*The results may differ slightly from those in the paper due to the introduction of randomness.*
+
 
 To reproduce this result, you can run:
 

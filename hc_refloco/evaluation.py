@@ -128,10 +128,10 @@ class HCRefLoCoEvaluator:
             if k in self.show_ths:
                 acc_dict[f"iou|{k}"] = v
         mean_acc = mean([v for v in accs.values()])
-        acc_dict['iou|0.5:0.9'] = mean_acc
+        acc_dict['iou|0.5:0.95'] = mean_acc
 
         # Accs for copy
-        acc_dict['Accs for copy'] = [round(v, 2) for v in acc_dict.values()]
+        acc_dict['Accs for copy'] = [round(v, 3) for v in acc_dict.values()]
 
         # Subject evaluation
         subjects_accs = dict()
@@ -145,7 +145,7 @@ class HCRefLoCoEvaluator:
             else:
                 subjects_accs[subject] = None
         acc_dict.update({f"Subject-{subject}": acc for subject, acc in subjects_accs.items()})
-        acc_dict['Subject evaluation for copy'] = [round(v, 2) if v is not None else None for v in subjects_accs.values()]
+        acc_dict['Subject evaluation for copy'] = [round(v, 3) if v is not None else None for v in subjects_accs.values()]
 
         # Size evaluation
         size_accs = {'small': [], 'medium': [], 'large': []}
@@ -160,9 +160,9 @@ class HCRefLoCoEvaluator:
         acc_dict['Small'] = mean(size_accs['small']) if size_accs['small'] else None
         acc_dict['Medium'] = mean(size_accs['medium']) if size_accs['medium'] else None
         acc_dict['Large'] = mean(size_accs['large']) if size_accs['large'] else None
-        acc_dict['Size evaluation for copy'] = [round(acc_dict['Small'], 2) if acc_dict['Small'] is not None else None, 
-                                                round(acc_dict['Medium'], 2) if acc_dict['Medium'] is not None else None, 
-                                                round(acc_dict['Large'], 2) if acc_dict['Large'] is not None else None]
+        acc_dict['Size evaluation for copy'] = [round(acc_dict['Small'], 3) if acc_dict['Small'] is not None else None, 
+                                                round(acc_dict['Medium'], 3) if acc_dict['Medium'] is not None else None, 
+                                                round(acc_dict['Large'], 3) if acc_dict['Large'] is not None else None]
 
         # Output as table
         table = []
