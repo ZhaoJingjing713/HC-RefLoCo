@@ -3,3 +3,5 @@ __pycache__/
 hc_refloco.egg-info/
 build/
 demo_models/ckpt/
+demo_models/ml-ferret/ferret.egg-info/
+demo_models/ml-ferret/output_hc_refloco/

@@ -36,7 +36,7 @@ import torchvision
 from torch.utils.data import Dataset
 import numpy as np
 from copy import deepcopy
-
+from hc_refloco import HCRefLoCoDataset
 # Added for visualization
 from PIL import Image, ImageDraw, ImageFont
 
@@ -111,28 +111,25 @@ def find_bbox_template(text, img_w, img_h):
 
 
 class RefExpGrounding(Dataset):
-    def __init__(self, img_folder, ann_file, mode='caption',transforms=None):
+    def __init__(self, data_path, split, transforms=None):
         super(RefExpGrounding, self).__init__()
-        self.img_folder = img_folder
-        with open(ann_file, "r") as f:
-            self.annts = json.load(f)
-        self.mode=mode
+        self.data_path = data_path
+        self.datas=HCRefLoCoDataset(data_path,split)
         self._transforms = transforms
         # self.question_prompt = "What is the location of \"<obj>\" in the image?"
         self.question_prompt = "What is the location of the description: \"<obj>\" in the image?"
 
     def __len__(self):
-        return len(self.annts)
+        return len(self.datas)
     
     def __getitem__(self, idx):
-        image_id = self.annts[idx]["image_id"]
-        file_name = self.annts[idx]["file_name"]
-        img_path = os.path.join(self.img_folder, file_name)
-        img = Image.open(img_path).convert("RGB")
-        caption = self.annts[idx][self.mode]
+        img, annt = self.datas[idx]
+        ann_id = annt["id"]
+        file_name = annt["file_name"]
+        caption = annt['caption']
 
-        dataset_name = 'rec_human'
-        bbox_xywh = self.annts[idx]["bbox"]
+        dataset_name = 'hc_refloco'
+        bbox_xywh = annt["bbox"]
         bbox_xyxy = np.array([bbox_xywh[0], bbox_xywh[1], bbox_xywh[0] + bbox_xywh[2], bbox_xywh[1] + bbox_xywh[3]])
         w, h = img.size
         bbox_xyxy[0::2].clip(min=0, max=w)
@@ -141,7 +138,7 @@ class RefExpGrounding(Dataset):
         assert "<obj>" in self.question_prompt
         question = self.question_prompt.replace("<obj>", remove_punctuation(caption))
 
-        target = {"image_id": image_id, "file_name": file_name,  "caption": caption, 
+        target = {"id": ann_id, "file_name": file_name,  "caption": caption, 
                    "img_w": w, "img_h": h, "question": question, "bboxes": bbox_xyxy.tolist(), "entities": [caption]}
         if self._transforms is not None:
             img, target = self._transforms(img, target)
@@ -151,11 +148,11 @@ class RefExpGrounding(Dataset):
 
 def eval_model_refexp(args):
     # Data
-    dataset = RefExpGrounding(img_folder=args.image_path, 
-                              ann_file=args.data_path,
-                              transforms=None,
-                              mode=args.mode
-                              )
+    dataset = RefExpGrounding(
+        data_path=args.data_path,
+        split=args.data_split,
+        transforms=None
+        )
     data_ids = range(len(dataset))
 
     # Model
@@ -221,11 +218,8 @@ def eval_model_refexp(args):
         
         # Plot Preds
         pred_entities, pred_bboxes = find_bbox_template(outputs, img_w=img_w, img_h=img_h)
-        # img = plot_refexp(img, pred_bboxes[0], pred_entities, mode="pred")
-        # os.makedirs('refexp_result/images', exist_ok=True)
-        # img.save('refexp_result/images/{}.png'.format(i))
 
-        ans_file.write(json.dumps({"image_id": ann['image_id'],    
+        ans_file.write(json.dumps({"id": ann['id'],    
                                    "file_name": ann["file_name"],
                                    "prompt": cur_prompt,
                                    "text": outputs,
@@ -239,12 +233,11 @@ def eval_model_refexp(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model-path", type=str, default="ckpt/ferret-7b-v1-3")
+    parser.add_argument("--model-path", type=str, default="../ckpt/ferret-7b-v1.3")
     parser.add_argument("--model-base", type=str, default=None)
-    parser.add_argument("--image_path", type=str, default="/home/v-jinjzhao/dev/datasets/rec_human/images_v2/val_ready")
-    parser.add_argument("--data_path", type=str, default="/home/v-jinjzhao/dev/datasets/rec_human/person_annts_val_ready.json")
-    parser.add_argument("--mode", type=str, default="caption")
-    parser.add_argument("--answers-file", type=str, default="refexp_result/ref_human")
+    parser.add_argument("--data-path", type=str)
+    parser.add_argument("--data-split", type=str, default='val')
+    parser.add_argument("--answers-file", type=str, default="output_hc_refloco")
     parser.add_argument("--conv-mode", type=str, default="ferret_v1")
     parser.add_argument("--num-chunks", type=int, default=1)
     parser.add_argument("--chunk-idx", type=int, default=0)
@@ -255,5 +248,6 @@ if __name__ == "__main__":
     parser.add_argument("--top_p", type=float, default=None)
     parser.add_argument("--num_beams", type=int, default=1)
     args = parser.parse_args()
+    
 
     eval_model_refexp(args)

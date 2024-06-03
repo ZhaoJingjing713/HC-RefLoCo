@@ -34,7 +34,7 @@ Additionally, we offer the `change_split` method, which accepts a `split` parame
 We provide the `HCRefLoCoEvaluator` class, which takes the following arguments:
 
 ```txt
-- dataset (datasets.DatasetDict): The dataset to evaluate.
+- dataset (datasets.DatasetDict|str): The dataset/path_to_dataset to evaluate.
 - split (str): The split of the dataset to evaluate. Default is 'val'.
 - thresholds (List[float]): The thresholds to evaluate the IoU. Default is [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95].
 - show_ths (List[float]): The thresholds to display in the evaluation results. Default is [0.5, 0.75, 0.9].
@@ -111,8 +111,29 @@ accelerate launch --num_processes 4 \
 ```bash
 python eval_pred.py \
     --pred_dir <Output Path Set in Step 2> \
-    --split val \
+    --split <val or test> \
     --dataset_path <HC-RefLoCo Path>
+```
+
+### 2. Ferret
+
+1. Run the inference command:
+```bash
+cd demo_models/ml-ferret
+python ./ferret/eval/eval_refexp_hc_refloco.py \
+    --model-path <checkpoint path> \
+    --data-path <HC-RefLoCo Path> \
+    --data-split <val or test> \
+    --answers-file <Output Path>
+```
+
+2. Run `eval_pred.py` to evaluate the inference results.
+
+```bash
+python ferret/eval/eval_refexp_hc_refloco.py \
+    --prediction_file <Output Path> \
+    --data_path <HC-RefLoCo Path> \
+    --data_split <val or test>
 ```
 
 ### Coming Soon...

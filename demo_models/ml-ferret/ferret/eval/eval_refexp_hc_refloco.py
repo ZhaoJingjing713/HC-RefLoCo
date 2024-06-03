@@ -20,7 +20,8 @@ from prettytable import PrettyTable
 import re
 import json
 from statistics import mean
-
+from hc_refloco import HCRefLoCoEvaluator
+from datasets import load_dataset
 from misc.box_ops import box_iou
 
 VOCAB_IMAGE_W = 1000
@@ -106,12 +107,11 @@ def calculate_iou_acc(pred_bboxes,gt_bboxes, thresh=0.5):
     return iou,accs
 
 class RefExpEvaluatorFromJsonl(object):
-    def __init__(self, refexp_gt_path, k=(1, -1), thresh_iou=0.5):
+    def __init__(self, refexp_gt_path, data_split, k=(1, -1), thresh_iou=0.5):
         self.refexp_gt_path=refexp_gt_path
         assert isinstance(k, (list, tuple))
-        with open(refexp_gt_path, 'r') as f:
-            self.refexp_gt = json.load(f)
-        print(f"Load {len(self.refexp_gt)} annotations")
+        self.hc_refloco_evaluater=HCRefLoCoEvaluator(refexp_gt_path, data_split)
+        print(f"Load {len(self.hc_refloco_evaluater.dataset)} annotations")
         self.k = k
         self.thresh_iou = thresh_iou
 
@@ -129,89 +129,43 @@ class RefExpEvaluatorFromJsonl(object):
         
         # sort the predictions based on 'image_id'
         # predictions = sorted(predictions, key=lambda x: x['image_id'])
-        assert len(self.refexp_gt) == len(predictions), f"len(self.refexp_gt)={len(self.refexp_gt)}, len(predictions)={len(predictions)}"
+        if len(self.hc_refloco_evaluater.dataset) != len(predictions):
+            print(f"Warning: len(dataset)={len(self.hc_refloco_evaluater.dataset)}, len(predictions)={len(predictions)}")
 
-        all_gt_bboxes=[]
-        all_pred_bboxes=[]
-        all_mean_pred_bboxes=[]
-        for item_ann, item_pred in tqdm(zip(self.refexp_gt, predictions)):
-                
-            if item_pred['image_id'] != item_ann['image_id']:
-                raise ValueError(f"Ann\n{item_ann} \nis not matched\n {item_pred}")
-
-            target_bbox = item_ann["bbox"]
-            converted_bbox = [
-                target_bbox[0],
-                target_bbox[1],
-                target_bbox[2] + target_bbox[0],
-                target_bbox[3] + target_bbox[1],
-            ]
-            all_gt_bboxes.append(converted_bbox)
+        predictions_to_eval=[]
+        for item_pred in tqdm(predictions):
             predict_boxes = item_pred["pred_bboxes"]
+            pred_id=item_pred["id"]
+            pred_format='xyxy'
             
             if len(predict_boxes) == 0:
-                print(f"Can't find valid bbox for the given phrase {item_pred}.")
-                print(f"We set a 0-area box to calculate result")
+                if(verbose):
+                    print(f"Can't find valid bbox for the given phrase {item_pred}.")
+                    print(f"We set a 0-area box to calculate result")
                 predict_boxes = [[0., 0., 0., 0.]]                                                                                                               
-
-            predict_boxes = torch.as_tensor(predict_boxes).view(-1, 4).to(dtype=torch.float32)
-            all_pred_bboxes.append(predict_boxes[0])
-            all_mean_pred_bboxes.append(predict_boxes.mean(0))
+            # predict_boxes = torch.as_tensor(predict_boxes).view(-1, 4).to(dtype=torch.float32)[0]
+            predict={
+                'pred_bbox': predict_boxes[0],
+                'id': pred_id,
+                'format': pred_format
+            }
+            predictions_to_eval.append(predict)
             
-        pred_bboxes=torch.stack(all_pred_bboxes)
-        mean_pred_bboxes=torch.stack(all_mean_pred_bboxes)
-        gt_bboxes=torch.tensor(all_gt_bboxes)
-        # create a list fron 0.5 to 0.9 with step 0.05
-        thresh=[i/100 for i in range(50,95,5)]
-        print(thresh)
-        iou,acc=calculate_iou_acc(pred_bboxes,gt_bboxes,thresh)
-        print_ths=[0.5,0.7,0.9]
-        for k,v in acc.items():
-            if(k in print_ths):
-                print(f"thresh={k}, acc={v}")
-        print(f"iou|0.5:0.9={mean([v for v in acc.values()])}")
-
-        print(iou)
-        print(acc)
-        print(f"{len(iou)}/{len(self.refexp_gt)}")
-        print(f"##############################################")
-        print(f"mean_pred_bboxes")
-        print(thresh)
-        iou,acc=calculate_iou_acc(mean_pred_bboxes,gt_bboxes,thresh)
-        print_ths=[0.5,0.7,0.9]
-        for k,v in acc.items():
-            if(k in print_ths):
-                print(f"thresh={k}, acc={v}")
-        print(f"iou|0.5:0.9={mean([v for v in acc.values()])}")
-
-        print(iou)
-        print(acc)
-        print(f"{len(iou)}/{len(self.refexp_gt)}")
-
-        for pred_box,iou_i, annt in zip(pred_bboxes.tolist(), iou, self.refexp_gt):
-            annt['ferret_7b_caption_pred']=dict(
-                pred_bbox=pred_box,
-                iou=iou_i.item()
-            )
-        # with open('/home/v-jinjzhao/dev/datasets/rec_human/person_annts_val_ready.json', 'w') as f:
-        #     json.dump(self.refexp_gt, f, indent=2)
-
+        self.hc_refloco_evaluater.evaluate(predictions_to_eval)
+   
 if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--prediction_file', default='refexp_result/ref_human_13b',help='prediction_file')
-    parser.add_argument('--annotation_file', default='/home/v-jinjzhao/dev/datasets/rec_human/person_annts_val_ready.json', help='annotation_file')
-    
+    parser.add_argument('--prediction_file', default='demo_models/ml-ferret/output_hc_refloco/0_of_1.jsonl',help='prediction_file')
+    parser.add_argument('--data_path', help='annotation_file')
+    parser.add_argument('--data_split',default='val', help='annotation_file')
     args = parser.parse_args()
-    
+
     evaluator = RefExpEvaluatorFromJsonl(
-        refexp_gt_path=args.annotation_file, 
+        refexp_gt_path=args.data_path, 
+        data_split=args.data_split,
         k=(1, 'mean', 'upper bound'), 
         thresh_iou=0.5,
     )
-    
     evaluator.summarize(args.prediction_file, verbose=False)
-    
-    # with open(os.path.join(args.prediction_file, "metric.json"), "w") as f:
-    #     json.dump(results, f, indent=2)

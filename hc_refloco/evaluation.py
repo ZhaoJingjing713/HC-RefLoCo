@@ -3,6 +3,7 @@ from .overlaps import bbox_overlaps
 from statistics import mean
 import pandas as pd
 import math
+from datasets import load_dataset
 
 
 class HCRefLoCoEvaluator:
@@ -14,7 +15,7 @@ class HCRefLoCoEvaluator:
                  large_size_th=256
                  ) -> None:
         '''
-        dataset (datasets.DatasetDict): The dataset to evaluate.
+        dataset (datasets.DatasetDict|str): The dataset/path_to_dataset to evaluate.
         split (str): The split of the dataset to evaluate. Default is 'val'.
         thresholds (List[float]): The thresholds to evaluate the IoU. Default is [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95].
         show_ths (List[float]): The thresholds to show in the evaluation results. Default is [0.5, 0.75, 0.9].
@@ -22,6 +23,8 @@ class HCRefLoCoEvaluator:
         small_size_th (int): The threshold to define the small size bbox. Default is 128.
         large_size_th (int): The threshold to define the large size bbox. Default is 256.
         '''
+        if(isinstance(dataset, str)):
+            dataset=load_dataset(dataset)
         self.dataset = dataset
         self.split=split
         self.accs=dict()
@@ -74,6 +77,9 @@ class HCRefLoCoEvaluator:
             ]
         - save_file (str): The file to save the evaluation results to.
         """
+        if(len(predictions)==0):
+            print("Warning: No predictions found.")
+            return dict()
         gt_bboxes = []
         pred_bboxes = []
         dataset=self.dataset[self.split]
@@ -84,8 +90,9 @@ class HCRefLoCoEvaluator:
         for idx, pred in enumerate(predictions):
             data=dataset[idx]
             if(pred['id']!=data['id']):
-                for data in dataset:
-                    if(pred['id']==data['id']):
+                for _data in dataset:
+                    if(pred['id']==_data['id']):
+                        data=_data
                         break
             assert data['id']==pred['id'], f"pred_id:{pred['id']} not found in dataset."
             gt_bbox=data['bbox']
@@ -131,27 +138,31 @@ class HCRefLoCoEvaluator:
         for subject in preds_gt_each_subjects:
             iou_subject = iou[preds_gt_each_subjects[subject]]
             acc_subject = []
-            for t in self.thresholds:
-                acc_subject.append((iou_subject > t).sum().item() / len(iou_subject))
-            subjects_accs[subject] = mean(acc_subject)
+            if len(iou_subject) > 0:
+                for t in self.thresholds:
+                    acc_subject.append((iou_subject > t).sum().item() / len(iou_subject))
+                subjects_accs[subject] = mean(acc_subject)
+            else:
+                subjects_accs[subject] = None
         acc_dict.update({f"Subject-{subject}": acc for subject, acc in subjects_accs.items()})
-        acc_dict['Subject evaluation for copy'] = [round(v, 2) for v in subjects_accs.values()]
+        acc_dict['Subject evaluation for copy'] = [round(v, 2) if v is not None else None for v in subjects_accs.values()]
 
         # Size evaluation
-        small_ious = iou[small_list]
-        medium_ious = iou[medium_list]
-        large_ious = iou[large_list]
-        small_accs = []
-        medium_accs = []
-        large_accs = []
-        for t in self.thresholds:
-            small_accs.append((small_ious > t).sum().item() / len(small_ious))
-            medium_accs.append((medium_ious > t).sum().item() / len(medium_ious))
-            large_accs.append((large_ious > t).sum().item() / len(large_ious))
-        acc_dict['Small'] = mean(small_accs)
-        acc_dict['Medium'] = mean(medium_accs)
-        acc_dict['Large'] = mean(large_accs)
-        acc_dict['Size evaluation for copy'] = [round(acc_dict['Small'], 2), round(acc_dict['Medium'], 2), round(acc_dict['Large'], 2)]
+        size_accs = {'small': [], 'medium': [], 'large': []}
+        for size_list, size_name in zip([small_list, medium_list, large_list], ['small', 'medium', 'large']):
+            ious = iou[size_list]
+            if len(ious) > 0:
+                for t in self.thresholds:
+                    size_accs[size_name].append((ious > t).sum().item() / len(ious))
+            else:
+                size_accs[size_name] = [None] * len(self.thresholds)
+        
+        acc_dict['Small'] = mean(size_accs['small']) if size_accs['small'] else None
+        acc_dict['Medium'] = mean(size_accs['medium']) if size_accs['medium'] else None
+        acc_dict['Large'] = mean(size_accs['large']) if size_accs['large'] else None
+        acc_dict['Size evaluation for copy'] = [round(acc_dict['Small'], 2) if acc_dict['Small'] is not None else None, 
+                                                round(acc_dict['Medium'], 2) if acc_dict['Medium'] is not None else None, 
+                                                round(acc_dict['Large'], 2) if acc_dict['Large'] is not None else None]
 
         # Output as table
         table = []
