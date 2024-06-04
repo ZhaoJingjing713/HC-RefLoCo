@@ -1,7 +1,7 @@
 import tarfile
 import io
 from PIL import Image
-from datasets import load_dataset
+from datasets import load_dataset, concatenate_datasets
 from torch.utils.data import Dataset
 
 class HCRefLoCoDataset(Dataset):
@@ -15,7 +15,7 @@ class HCRefLoCoDataset(Dataset):
         - custom_transforms: Custom image transformations to apply.
         """
         super(HCRefLoCoDataset, self).__init__()
-        assert split in ['val', 'test'], 'split should be val or test'
+        assert split in ['val', 'test', 'all'], 'split should be val, test or all'
         self.split = split
         self.dataset_path = dataset_path
         self.images_file = "images.tar.gz"
@@ -38,10 +38,12 @@ class HCRefLoCoDataset(Dataset):
 
     def _load_dataset(self):
         self.datas = load_dataset(self.dataset_path)
+        all_splits = concatenate_datasets([self.datas['val'],self.dadatastaset['test']])
+        self.datas['all'] = all_splits
         self.images = self._load_images_from_tar()
 
     def change_split(self, split):
-        assert split in ['val', 'test'], 'split should be val or test'
+        assert split in ['val', 'test', 'all'], 'split should be val, test or all'
         self.split = split
 
     def __len__(self):

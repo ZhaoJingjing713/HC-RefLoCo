@@ -21,7 +21,7 @@ We provide the `HCRefLoCoDataset` class, which inherits from `torch.utils.data.D
 
 ```txt
 - dataset_path (str): Path to the dataset directory.
-- split (str): Dataset split, typically "val" or "test".
+- split (str): Dataset split, typically "val", "test" or "all", the "all" denotes the whole datas.
 - custom_transforms: Custom image transformations to apply.
 ```
 
