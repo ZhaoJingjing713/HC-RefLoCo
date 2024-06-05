@@ -8,7 +8,7 @@ setup(
     install_requires=[
         # Add any dependencies your package needs here
         # e.g., 'numpy', 'pandas', 'scikit-learn'
-        'torch', 'datasets', 'pillow', 'statistics', 'pandas', 'datasets'
+        'torch', 'datasets', 'Pillow', 'statistics', 'pandas', 'datasets'
     ],
     entry_points={
         'console_scripts': [

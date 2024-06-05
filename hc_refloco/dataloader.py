@@ -38,7 +38,7 @@ class HCRefLoCoDataset(Dataset):
 
     def _load_dataset(self):
         self.datas = load_dataset(self.dataset_path)
-        all_splits = concatenate_datasets([self.datas['val'],self.dadatastaset['test']])
+        all_splits = concatenate_datasets([self.datas['val'],self.datas['test']])
         self.datas['all'] = all_splits
         self.images = self._load_images_from_tar()
 
