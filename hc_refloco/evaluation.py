@@ -94,7 +94,7 @@ class HCRefLoCoEvaluator:
         medium_list=[]
         large_list=[]
         for idx, pred in enumerate(predictions):
-            data=dataset[idx]
+            _,data=dataset[idx]
             if(pred['id']!=data['id']):
                 for _data in dataset:
                     if(pred['id']==_data['id']):
