@@ -111,7 +111,7 @@ accelerate launch --num_processes 4 \
         --main_process_port 20917 \
         mllm/pipeline/finetune.py \
         ./config/shikra_eval_hc_refloco.py \  
-        --cfg-options model_args.model_name_or_path=/path/to/checkpoint
+        --cfg-options model_args.model_name_or_path=<Checkpoint Path>
 ```
 4. Run `eval_pred.py` to evaluate the inference results.
 ```bash
