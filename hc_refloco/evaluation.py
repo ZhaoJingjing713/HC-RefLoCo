@@ -25,6 +25,7 @@ class HCRefLoCoEvaluator:
         '''
         if(isinstance(dataset, str)):
             dataset=load_dataset(dataset)
+        assert split in ['val', 'test', 'all'], 'split should be val, test or all'
         self.dataset = dataset
         self.split=split
         self.accs=dict()
@@ -35,7 +36,7 @@ class HCRefLoCoEvaluator:
         self.large_size_th=large_size_th
 
     def change_split(self, split):
-        assert split in ['val', 'test'], 'split should be val or test'
+        assert split in ['val', 'test', 'all'], 'split should be val, test or all'
         self.split = split
         
     @staticmethod
