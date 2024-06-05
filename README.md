@@ -21,11 +21,15 @@ We provide the `HCRefLoCoDataset` class, which inherits from `torch.utils.data.D
 
 ```txt
 - dataset_path (str): Path to the dataset directory.
-- split (str): Dataset split, typically "val", "test" or "all", the "all" denotes the whole datas.
+- split (str): Dataset split, typically "val" or "test".
 - custom_transforms: Custom image transformations to apply.
+- load_img (bool): Whether to load images from the tar file when init the class.
+- images_file (str): Name of the images 'tar.gz' file.
 ```
 
-Additionally, we offer the `change_split` method, which accepts a `split` parameter and is used to switch the dataset split.
+Additionally, we offer the:
+1. `change_split` method, which accepts a `split` parameter and is used to switch the dataset split.
+2. `load_images_from_tar` method, which accepts `img_path`, an optional parameter of the images `tar.gz` file. 
 
 ## Evaluation
 
@@ -34,7 +38,7 @@ Additionally, we offer the `change_split` method, which accepts a `split` parame
 We provide the `HCRefLoCoEvaluator` class, which takes the following arguments:
 
 ```txt
-- dataset (datasets.DatasetDict|str): The dataset/path_to_dataset to evaluate.
+- dataset (HCRefLoCoDataset|str): The dataset/path_to_dataset to evaluate.
 - split (str): The split of the dataset to evaluate. Default is 'val'.
 - thresholds (List[float]): The thresholds to evaluate the IoU. Default is [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95].
 - show_ths (List[float]): The thresholds to display in the evaluation results. Default is [0.5, 0.75, 0.9].

@@ -3,8 +3,7 @@ from .overlaps import bbox_overlaps
 from statistics import mean
 import pandas as pd
 import math
-from datasets import load_dataset
-
+from .dataloader import HCRefLoCoDataset
 
 class HCRefLoCoEvaluator:
     def __init__(self, dataset, split='val', 
@@ -15,7 +14,7 @@ class HCRefLoCoEvaluator:
                  large_size_th=256
                  ) -> None:
         '''
-        dataset (datasets.DatasetDict|str): The dataset/path_to_dataset to evaluate.
+        dataset (HCRefLoCoDataset|str): The dataset/path_to_dataset to evaluate.
         split (str): The split of the dataset to evaluate. Default is 'val'.
         thresholds (List[float]): The thresholds to evaluate the IoU. Default is [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95].
         show_ths (List[float]): The thresholds to show in the evaluation results. Default is [0.5, 0.75, 0.9].
@@ -24,8 +23,14 @@ class HCRefLoCoEvaluator:
         large_size_th (int): The threshold to define the large size bbox. Default is 256.
         '''
         if(isinstance(dataset, str)):
-            dataset=load_dataset(dataset)
-        assert split in ['val', 'test', 'all'], 'split should be val, test or all'
+            dataset=HCRefLoCoDataset(dataset,split,load_img=False)
+        elif(isinstance(dataset,HCRefLoCoDataset)):
+            if(dataset.split!=split):
+                print(f"Warning: the split ({split}) is not match with the dataset.split ({dataset.split})")
+                print(f"Warning: the split of the dataset is changed to {split}.")
+                dataset.change_split(split)
+        else:
+            raise ValueError("dataset should be a path to the dataset or a HCRefLoCoDataset object.")
         self.dataset = dataset
         self.split=split
         self.accs=dict()
@@ -36,8 +41,8 @@ class HCRefLoCoEvaluator:
         self.large_size_th=large_size_th
 
     def change_split(self, split):
-        assert split in ['val', 'test', 'all'], 'split should be val, test or all'
-        self.split = split
+        self.dataset.change_split(split)
+        self.split=split
         
     @staticmethod
     def calculate_iou_acc(bboxes_1, bboxes_2, thresh=0.5):
@@ -83,7 +88,7 @@ class HCRefLoCoEvaluator:
             return dict()
         gt_bboxes = []
         pred_bboxes = []
-        dataset=self.dataset[self.split]
+        dataset=self.dataset
         preds_gt_each_subjects={k:[] for k in self.subjects}
         small_list=[]
         medium_list=[]
