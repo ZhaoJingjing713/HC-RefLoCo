@@ -70,11 +70,11 @@ if __name__=='__main__':
 
     pred_path=f"{pred_dir}/metrics.pt"
     preds = torch.load(pred_path)
-    dataset=load_dataset(dataset_path)
-    evaluator=HCRefLoCoEvaluator(dataset,split)
-    annotations=dataset[split]
+    evaluator=HCRefLoCoEvaluator(dataset_path,split)
+    annotations=evaluator.dataset
     pred_dict=[]
     for idx,annt in enumerate(annotations):
+        _,annt=annt
         pred_bbox=preds['test_pred_boxes'][idx]
         height,width=annt['height'],annt['width']
 
