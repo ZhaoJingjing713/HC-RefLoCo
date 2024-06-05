@@ -165,9 +165,16 @@ def eval_model_refexp(args):
     answers_file = os.path.expanduser(args.answers_file)
     os.makedirs(answers_file, exist_ok=True)
     answers_file = os.path.join(answers_file, f'{args.chunk_idx}_of_{args.num_chunks}.jsonl')
-    ans_file = open(answers_file, "w")
+    if os.path.exists(answers_file) and args.resume:
+        ans_file = open(answers_file, "r+")
+        lines = ans_file.readlines()
+    else:
+        ans_file = open(answers_file, "w")
+        lines = []
 
     for i, id in enumerate(tqdm(chunk_data_ids)):
+        if(i<len(lines)):
+            continue
         img, ann = dataset[id]
         qs = ann["question"]
         cur_prompt = qs
@@ -238,6 +245,7 @@ if __name__ == "__main__":
     parser.add_argument("--data-path", type=str)
     parser.add_argument("--data-split", type=str, default='val')
     parser.add_argument("--answers-file", type=str, default="output_hc_refloco")
+    parser.add_argument("--resume", action="store_true")
     parser.add_argument("--conv-mode", type=str, default="ferret_v1")
     parser.add_argument("--num-chunks", type=int, default=1)
     parser.add_argument("--chunk-idx", type=int, default=0)

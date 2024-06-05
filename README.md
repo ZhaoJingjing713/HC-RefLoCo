@@ -122,11 +122,12 @@ python eval_pred.py \
 1. Run the inference command:
 ```bash
 cd demo_models/ml-ferret
-python ./ferret/eval/eval_refexp_hc_refloco.py \
+python ./ferret/eval/model_hc_refloco.py \
     --model-path <checkpoint path> \
     --data-path <HC-RefLoCo Path> \
     --data-split <val or test> \
-    --answers-file <Output Path>
+    --answers-file <Output Path> \
+    --resume
 ```
 
 2. Run `eval_pred.py` to evaluate the inference results.
