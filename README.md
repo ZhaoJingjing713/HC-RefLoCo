@@ -142,7 +142,16 @@ python ferret/eval/eval_refexp_hc_refloco.py \
     --data_path <HC-RefLoCo Path> \
     --data_split <val or test>
 ```
+### 3. KOSMOS-2
 
+1. Run the inference and evaluation command:
+```bash
+cd demo_models/kosmos-2
+python huggingface_kosmos.py \
+    --dataset-path <HC-RefLoCo Path> \
+    --split <val or test> \
+    --output-path <jsonl output path>
+```
 ### Coming Soon...
 
 Further model instructions and updates will be provided soon.
