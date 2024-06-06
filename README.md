@@ -10,6 +10,7 @@ The [HC-RefLoCo dataset](https://huggingface.co/datasets/Jinjing713/HC-RefLoCo) 
 sudo apt install git-lfs
 git clone https://huggingface.co/datasets/Jinjing713/HC-RefLoCo
 ```
+- Hint: Since the GitHub and Huggingface repositories share the same name, it is recommended to establish a new dir-path for the code or dataset.
 
 ## Installation
 
@@ -92,7 +93,7 @@ Medium                           | 0.3437775330396476
 Large                            | 0.3820263394193355
 Size evaluation for copy         | 0.14, 0.344, 0.382
 ```
-*The results may differ slightly from those in the paper due to the introduction of randomness.*
+- *The results may differ slightly from those in the paper due to the introduction of randomness.*
 
 
 To reproduce this result, you can run:
