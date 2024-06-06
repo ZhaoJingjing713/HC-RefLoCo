@@ -5,7 +5,11 @@ This repository contains the data loader, evaluation, and inference demonstratio
 
 ## Dataset Download
 
-The [HC-RefLoCo dataset](https://huggingface.co/datasets/Jinjing713/HC-RefLoCo) can be downloaded from Hugging Face.
+The [HC-RefLoCo dataset](https://huggingface.co/datasets/Jinjing713/HC-RefLoCo) can be downloaded from Hugging Face:
+```bash
+sudo apt install git-lfs
+git clone https://huggingface.co/datasets/Jinjing713/HC-RefLoCo
+```
 
 ## Installation
 
