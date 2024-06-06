@@ -16,7 +16,12 @@ git clone https://huggingface.co/datasets/Jinjing713/HC-RefLoCo
 You can install the data loader and evaluation API with the following command:
 
 ```bash
-pip install ./
+pip install 'git+https://github.com/ZhaoJingjing713/HC-RefLoCo.git'
+# (add --user if you don't have permission)
+
+# Or, to install it from a local clone:
+git clone https://github.com/ZhaoJingjing713/HC-RefLoCo.git
+pip install -e HC-RefLoCo
 ```
 
 ## Data Loader
