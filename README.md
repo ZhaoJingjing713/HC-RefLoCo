@@ -31,7 +31,7 @@ We provide the `HCRefLoCoDataset` class, which inherits from `torch.utils.data.D
 
 ```txt
 - dataset_path (str): Path to the dataset directory.
-- split (str): Dataset split, typically "val" or "test".
+- split (str): Dataset split, typically "val", "test" or "all".
 - custom_transforms: Custom image transformations to apply.
 - load_img (bool): Whether to load images from the tar file when init the class.
 - images_file (str): Name of the images 'tar.gz' file.
