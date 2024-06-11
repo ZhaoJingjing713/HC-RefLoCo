@@ -4,5 +4,3 @@ hc_refloco.egg-info/
 build/
 demo_models/ckpt/
 demo_models/ml-ferret/ferret.egg-info/
-demo_models/ml-ferret/output_hc_refloco/
-demo_models/kosmos-2/output/

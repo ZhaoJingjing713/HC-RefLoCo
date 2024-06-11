@@ -7,8 +7,11 @@ setup(
     py_modules=['dataloader', 'evaluation', 'overlaps'],
     install_requires=[
         # Add any dependencies your package needs here
-        # e.g., 'numpy', 'pandas', 'scikit-learn'
-        'torch', 'datasets', 'Pillow', 'statistics', 'pandas', 'datasets'
+        'torch>=2.1.0', 
+        'datasets>=2.19.0',
+        'Pillow>=10.3.0', 
+        'statistics>=1.0.3.5', 
+        'pandas>=2.2.2'
     ],
     entry_points={
         'console_scripts': [

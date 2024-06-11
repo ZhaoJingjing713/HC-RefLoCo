@@ -41,6 +41,8 @@ if __name__ == "__main__":
 
     for idx, data in enumerate(tqdm(dataset)):
         if(idx<len(lines)):
+            pred_item = json.loads(lines[idx].strip())
+            predictions.append(pred_item)
             continue
         img, ann = data
         caption=ann['caption']

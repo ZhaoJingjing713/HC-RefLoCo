@@ -130,6 +130,7 @@ python eval_pred.py \
     --split <val or test> \
     --dataset_path <HC-RefLoCo Path>
 ```
+The `val` split inference results are provided at `demo_models/shikra/exp-hc_refloco/shikra_eval_hc_refloco`, you can run the `step 4` to reproduce results.
 
 ### 2. Ferret
 
@@ -152,6 +153,9 @@ python ferret/eval/eval_refexp_hc_refloco.py \
     --data_path <HC-RefLoCo Path> \
     --data_split <val or test>
 ```
+
+The `val` split inference results are provided at `demo_models/ml-ferret/output_hc_refloco`, you can run the `step 2` to reproduce results.
+
 ### 3. KOSMOS-2
 
 1. Run the inference and evaluation command:
@@ -160,8 +164,12 @@ cd demo_models/kosmos-2
 python huggingface_kosmos.py \
     --dataset-path <HC-RefLoCo Path> \
     --split <val or test> \
-    --output-path <jsonl output path>
+    --output-path <jsonl output path> \
+    --resume
 ```
+
+The `val` split inference results are provided at `demo_models/kosmos-2/output/predictions.jsonl`, you can run the `step 1` to reproduce results.
+
 ### Coming Soon...
 
 Further model instructions and updates will be provided soon.
